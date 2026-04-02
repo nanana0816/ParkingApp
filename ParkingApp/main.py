@@ -46,6 +46,9 @@ async def handle_form(company: str = Form(...), name: str = Form(...), car_numbe
     
     # 1. 画像をリサイズしてメモリ上に保存
     img = Image.open(photo.file)
+        # 【ここを追加！】透明な層(RGBA)を普通の形式(RGB)に変換する
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
     img.thumbnail((800, 800))
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format='JPEG', quality=85)
