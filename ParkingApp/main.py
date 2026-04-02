@@ -25,16 +25,18 @@ def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
         raise HTTPException(status_code=401, detail="Unauthorized", headers={"WWW-Authenticate": "Basic"})
     return credentials.username
 
-# HTMLレンダリング関数
+from jinja2 import Environment, FileSystemLoader
+
+# HTMLレンダリング関数 (Jinja2対応版)
 def render_html(filename: str, context: dict = None):
-    base_dir = os.path.dirname(__file__)
-    path = os.path.join(base_dir, "templates", filename)
-    with open(path, "r", encoding="utf-8") as f:
-        content = f.read()
-    if context:
-        for key, value in context.items():
-            content = content.replace("{{" + key + "}}", str(value)).replace("{{ " + key + " }}", str(value))
-    return content
+    # templates フォルダから読み込む設定
+    env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
+    template = env.get_template(filename)
+    
+    if context is None:
+        context = {}
+        
+    return template.render(context)
 
 @app.get("/", response_class=HTMLResponse)
 async def get_form():
