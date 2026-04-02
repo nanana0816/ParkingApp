@@ -111,7 +111,9 @@ async def approve_request(request_id: str, username: str = Depends(get_current_u
     
     db_blob_client.upload_blob(output.getvalue(), overwrite=True)
     return RedirectResponse(url="/admin", status_code=303)
+# --- ここから下が最終行までの追加分です ---
+
 @app.get("/status/{request_id}", response_class=HTMLResponse)
 async def get_status(request_id: str):
-    # status.html を読み込んで表示
+    # status.html を読み込んで表示。render_html関数が定義されている前提です。
     return HTMLResponse(content=render_html("status.html", {"request_id": request_id}))
