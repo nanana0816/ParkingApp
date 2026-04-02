@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
+    <title>Application Status</title>
+    <style>
+        body { font-family: serif; background: #f4f4f4; text-align: center; padding: 50px 20px; }
+        .ticket { background: white; padding: 40px; border: 1px solid #ddd; max-width: 400px; margin: auto; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; }
+        .approved { border: 4px solid #c5a059; background: #fffcf5; }
+        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin: 20px 0; }
+        .pending-bg { background: #eee; color: #666; }
+        .approved-bg { background: #c5a059; color: white; }
+        
+        /* 更新ボタンのスタイル */
+        .refresh-btn {
+            background: #1a2a3a; color: white; border: none; padding: 10px 20px;
+            border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 20px;
+            display: flex; align-items: center; justify-content: center; margin-left: auto; margin-right: auto;
+        }
+        .refresh-btn:active { background: #c5a059; }
+        .auto-refresh-label { font-size: 11px; color: #999; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <h2>PARKING TICKET</h2>
+        <p>ID: {{ id }}</p>
+        <p>Guest: {{ name }} 様</p>
+
+        {% if user.status == "approved" %}
+            <div class="status-badge approved-bg">APPROVED (承認済み)</div>
+            <div style="margin-top:20px;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ id }}" alt="QR">
+                <p style="font-size:10px; color:#999; margin-top:10px;">Please show this at the gate.</p>
+            </div>
+        {% else %}
+            <div class="status-badge pending-bg">WAITING (確認中...)</div>
+            <p style="font-size: 14px;">承認をお待ちください。</p>
+            
+            <button onclick="location.reload();" class="refresh-btn">
+                🔄 今すぐ更新する
+            </button>
+            <p class="auto-refresh-label">※30秒ごとに自動で更新されます</p>
+        {% endif %}
+    </div>
+    <p style="margin-top:30px;"><a href="/" style="color:#666; text-decoration:none; font-size:12px;">← 申請画面へ戻る</a></p>
+</body>
+</html>
