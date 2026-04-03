@@ -99,22 +99,21 @@ async def get_status(request_id: str):
 async def admin_page(username: str = Depends(get_current_username)):
     db_blob_client = blob_service_client.get_blob_client(container="database", blob="parking_requests.csv")
     
-    # メタデータ取得
     props = db_blob_client.get_blob_properties()
     last_mod = props.last_modified.astimezone(ZoneInfo("Asia/Tokyo")).strftime("%Y/%m/%d %H:%M:%S")
     
-    # CSV読み込み
     try:
         content = db_blob_client.download_blob().content_as_text()
-        # 空行を飛ばして読み込む実務的な処理
         rows = [r for r in csv.reader(io.StringIO(content.strip())) if len(r) >= 7]
     except:
         rows = []
     
+    # 【ここが重要！】
+    # ブラウザがAzureから直接画像を読み込めるよう、ストレージの「アカウント名」を確実に渡します
     return HTMLResponse(content=render_html("admin.html", {
         "requests": rows,
         "last_modified": last_mod,
-        "account_name": blob_service_client.account_name
+        "account_name": blob_service_client.account_name # famparkingnao08 が入ります
     }))
 
 @app.post("/admin/approve/{request_id}")
