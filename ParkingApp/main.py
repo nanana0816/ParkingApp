@@ -6,6 +6,7 @@ import os, csv, uuid, secrets, io
 from datetime import datetime
 from PIL import Image
 from azure.storage.blob import BlobServiceClient
+from zoneinfo import ZoneInfo # 冒頭に追加
 
 app = FastAPI()
 security = HTTPBasic()
@@ -99,12 +100,22 @@ async def admin_panel(username: str = Depends(get_current_username)):
 
     return HTMLResponse(content=f"<html><body><h1>FAM Admin</h1><table>{table_html}</table></body></html>")
 
-@app.post("/admin/approve/{request_id}")
-async def approve_request(request_id: str, username: str = Depends(get_current_username)):
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(username: str = Depends(get_current_username)):
     db_blob_client = blob_service_client.get_blob_client(container="database", blob="parking_requests.csv")
+    
+    # Azure上のCSVの最終更新日時を取得
+    props = db_blob_client.get_blob_properties()
+    # 日本時間に変換して整形
+    last_mod = props.last_modified.astimezone(ZoneInfo("Asia/Tokyo")).strftime("%Y/%m/%d %H:%M:%S")
+    
     content = db_blob_client.download_blob().content_as_text()
     rows = list(csv.reader(io.StringIO(content)))
     
+    return HTMLResponse(content=render_html("admin.html", {
+        "requests": rows,
+        "last_modified": last_mod
+    }))    
     output = io.StringIO()
     writer = csv.writer(output)
     for row in rows:
