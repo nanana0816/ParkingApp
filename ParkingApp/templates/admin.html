@@ -22,5 +22,21 @@
         </tr>
         {% endfor %}
     </table>
+  <hr>
+<div style="text-align: center; margin-top: 20px; font-size: 0.9em; color: #555;">
+    <p>データ最終更新 (Azure): {{ last_modified }}</p>
+    <p>画面自動更新時刻: <span id="update-time"></span></p>
+</div>
+
+<script>
+    // 画面が読み込まれた時刻を表示
+    const now = new Date();
+    document.getElementById('update-time').innerText = now.toLocaleTimeString();
+
+    // 30秒ごとに自動リロード
+    setTimeout(() => {
+        location.reload();
+    }, 30000);
+</script>
 </body>
 </html>
