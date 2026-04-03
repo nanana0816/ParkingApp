@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"><title>Admin Panel</title></head>
+<body style="font-family:sans-serif; padding:20px;">
+    <h1>駐車申請 管理パネル</h1>
+    <table border="1" style="width:100%; border-collapse: collapse; text-align: left;">
+        <tr style="background:#eee;">
+            <th>ID</th><th>日時</th><th>会社名</th><th>氏名</th><th>車両</th><th>写真</th><th>状態</th><th>操作</th>
+        </tr>
+        {% for row in requests %}
+        <tr>
+            <td>{{ row[0] }}</td><td>{{ row[1] }}</td><td>{{ row[2] }}</td><td>{{ row[3] }}</td><td>{{ row[4] }}</td>
+            <td><a href="/uploads/{{ row[5] }}" target="_blank">表示</a></td>
+            <td>{{ row[6] }}</td>
+            <td>
+                {% if row[6] == "pending" %}
+                <form action="/admin/approve/{{ row[0] }}" method="post">
+                    <button type="submit" style="background: #2c3e50; color:white; border:none; cursor:pointer;">承認する</button>
+                </form>
+                {% else %} ✅済み {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div style="text-align: right; margin-bottom: 10px; color: #666;">
+    最終更新: <span id="last-update">読み込み中...</span>
+</div>
+
+<script>
+    // 最終更新日時を表示する関数
+    function updateTimestamp() {
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0') + ':' + 
+                        now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('last-update').innerText = timeStr;
+    }
+
+    // 30秒ごとにページをリロードする
+    setTimeout(function(){
+        location.reload();
+    }, 30000); // 30000ミリ秒 = 30秒
+
+    // 読み込み時に実行
+    window.onload = updateTimestamp;
+</script>
+</body>
+</html>
