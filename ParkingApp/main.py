@@ -117,5 +117,24 @@ async def approve_request(request_id: str, username: str = Depends(get_current_u
 
 @app.get("/status/{request_id}", response_class=HTMLResponse)
 async def get_status(request_id: str):
-    # status.html を読み込んで表示。render_html関数が定義されている前提です。
-    return HTMLResponse(content=render_html("status.html", {"request_id": request_id}))
+    # AzureからCSVをダウンロードして、該当するユーザーのステータスを確認する
+    db_blob_client = blob_service_client.get_blob_client(container="database", blob="parking_requests.csv")
+    content = db_blob_client.download_blob().content_as_text()
+    rows = list(csv.reader(io.StringIO(content)))
+    
+    user_data = None
+    for row in rows:
+        if row[0] == request_id:
+            # CSVの列に合わせて調整してください（例：row[1]が名前、row[6]がステータス）
+            user_data = {"id": row[0], "name": row[1], "status": row[6]}
+            break
+
+    if not user_data:
+        return HTMLResponse(content="Request Not Found", status_code=404)
+
+    # HTMLに 'user' という名前でデータを渡す
+    return HTMLResponse(content=render_html("status.html", {
+        "id": request_id,
+        "name": user_data["name"],
+        "user": user_data  # これが足りなかったためにエラーが出ていました
+    }))
